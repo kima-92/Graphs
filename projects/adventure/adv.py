@@ -91,15 +91,24 @@ while len(visited) < len(room_graph):
     last_move =  traversal_path[-1]
     # Get it's opposite
     opp_move = opp_dirs[last_move]
+    # Easy access to this room in visited Dictionary
+    curr_room_in_visited = visited[current_room]
     
-    # if directions for previous is still "?"
-    if visited[current_room][opp_move] == "?":
-        # add current room as last room, direction moved
-        visited[return_path[-1]][last_move] = current_room
-        # add last room as current room, opposite direction
-        visited[current_room][opp_move] = return_path[-1]
-    
-    # if any directions for current_room are "?" 
+    # if direction for previous move is still "?"
+    if curr_room_in_visited[opp_move] == "?":
+
+        # set the last room ID in return_path, 
+        # as the value for the opposite direction in current_room's directions dictionary
+        curr_room_in_visited[opp_move] = return_path[-1]
+        # Get prev_room from visited
+        prev_room = visited[return_path[-1]]
+
+        # Set the last_move's value as the current_room's ID,
+        # in prev_room's dictionary
+        prev_room[last_move] = current_room
+
+    # If any other of current_exits have not been visited,
+    # Go to one of those rooms
     if "?" in visited[current_room].values():
         # for each available exit
         for direction in current_exits:
@@ -115,24 +124,25 @@ while len(visited) < len(room_graph):
                 # Stop looking for other rooms
                 break
 
-    # if all exits visited:
+    # If all of current_exits have been visited, but there
+    # are still rooms that have not been visited 
     elif len(visited) < len(room_graph):
         # if last room id on path is this room id, delete it
         if return_path[-1] == current_room:
             del return_path[-1]
 
+        # Go back to previous room
         for direction in current_exits:
             room = visited[current_room]
-            # find last room on path among directions
+            # find direction to last room in return_path
             if room[direction] != None and room[direction] == return_path[-1]:
                 # add direction to traversal path
                 traversal_path.append(direction)
+                # Move player in this direction
                 player.travel(direction)
+                # Stop looking for other rooms to go to
                 break
-
-    #print(traversal_path)
     
-
 # TRAVERSAL TEST
 visited_rooms = set()
 player.current_room = world.starting_room
